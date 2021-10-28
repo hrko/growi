@@ -25,7 +25,7 @@ const PageRenameModal = (props) => {
     t, appContainer, pageContainer,
   } = props;
 
-  const { path } = pageContainer.state;
+  const path = pageContainer.state.path || props.path;
 
   const { crowi } = appContainer.config;
 
@@ -59,7 +59,7 @@ const PageRenameModal = (props) => {
 
   const updateSubordinatedList = useCallback(async() => {
     try {
-      const res = await appContainer.apiv3Get('/pages/subordinated-list', { path });
+      const res = await appContainer.apiv3Get('/pages/subordinated-list', path);
       const { subordinatedPaths } = res.data;
       setSubordinatedPages(subordinatedPaths);
     }
@@ -118,6 +118,7 @@ const PageRenameModal = (props) => {
         isRenameRedirect,
         isRenameMetadata,
       );
+      console.log(response);
 
       const { page } = response.data;
       const url = new URL(page.path, 'https://dummy');

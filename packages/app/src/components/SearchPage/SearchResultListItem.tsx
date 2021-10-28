@@ -1,8 +1,10 @@
-import React, { FC, useMemo } from 'react';
+import React, { FC, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { UserPicture, PageListMeta, PagePathLabel } from '@growi/ui';
 import { DevidedPagePath } from '@growi/core';
 import { ISearchedPage } from './SearchResultList';
+
+import PageRenameModal from '../PageRenameModal';
 
 import loggerFactory from '~/utils/logger';
 
@@ -13,11 +15,26 @@ type Props ={
   onClickInvoked?: (pageId: string) => void,
 }
 
-
 const PageItemControl: FC<Props> = (props: {page: ISearchedPage}) => {
 
   const { page } = props;
   const { t } = useTranslation('');
+
+  const [isPageRenameModalShown, setIsPageRenameModalShown] = useState<boolean>(false);
+
+
+  const renderModals = () => {
+    return (
+      <>
+        <PageRenameModal
+          isOpen={isPageRenameModalShown}
+          onClose={() => setIsPageRenameModalShown(false)}
+          path={page.path}
+        />
+      </>
+    );
+  };
+
 
   return (
     <>
@@ -56,10 +73,11 @@ const PageItemControl: FC<Props> = (props: {page: ISearchedPage}) => {
         <button className="dropdown-item" type="button" onClick={() => console.log('duplicate modal show')}>
           <i className="icon-fw icon-docs"></i>{t('Duplicate')}
         </button>
-        <button className="dropdown-item" type="button" onClick={() => console.log('rename function will be added')}>
+        <button className="dropdown-item" type="button" onClick={() => setIsPageRenameModalShown(true)}>
           <i className="icon-fw  icon-action-redo"></i>{t('Move/Rename')}
         </button>
       </div>
+      {renderModals()}
     </>
   );
 
