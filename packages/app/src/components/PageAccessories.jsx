@@ -7,10 +7,14 @@ import PageAccessoriesModal from './PageAccessoriesModal';
 import { withUnstatedContainers } from './UnstatedUtils';
 import AppContainer from '~/client/services/AppContainer';
 import PageAccessoriesContainer from '~/client/services/PageAccessoriesContainer';
+import { useCurrentUser } from '~/stores/context';
 
 const PageAccessories = (props) => {
   const { appContainer, pageAccessoriesContainer, isNotFoundPage } = props;
   const { isGuestUser, isSharedUser } = appContainer;
+
+  const { data } = useCurrentUser();
+  console.log('currentUser', data);
 
   return (
     <>

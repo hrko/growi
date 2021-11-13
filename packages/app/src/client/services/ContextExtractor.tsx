@@ -20,6 +20,7 @@ const ContextExtractor: FC = () => {
    * App Context from DOM
    */
   const currentUser = JSON.parse(document.getElementById('growi-current-user')?.textContent || jsonNull);
+  console.log('え', document.getElementById('growi-current-user'));
 
   /*
    * Page Context from DOM
