@@ -1,6 +1,6 @@
 context('Open Page Delete Modal Diagrams', () => {
 
-  const ssPrefix = 'open-delete-modal-diagrams-';
+  const ssPrefix = 'open-delete-modal-';
 
   let connectSid: string | undefined;
 
@@ -31,7 +31,7 @@ context('Open Page Delete Modal Diagrams', () => {
     });
 
 
-     cy.screenshot(`${ssPrefix}-bootstrap4`,{ capture: 'viewport' });
+     cy.screenshot(`${ssPrefix}-diagrams`,{ capture: 'viewport' });
   });
 
 });
