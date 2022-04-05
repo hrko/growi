@@ -15,6 +15,8 @@ import { IPage } from '../../interfaces/page';
 import { getPageSchema, extractToAncestorsPaths, populateDataToShowRevision } from './obsolete-page';
 import { ObjectIdLike } from '~/server/interfaces/mongoose-utils';
 import { PageRedirectModel } from './page-redirect';
+import { IUser } from '~/interfaces/user';
+import { Ref } from '~/interfaces/common';
 
 const { addTrailingSlash } = pathUtils;
 const { isTopPage, collectAncestorPaths } = pagePathUtils;
@@ -469,7 +471,7 @@ schema.statics.createEmptyPagesByPaths = async function(paths: string[], user: a
 
   // insertMany empty pages
   try {
-    await this.insertMany(notExistingPagePaths.map(path => ({ path, isEmpty: true })));
+    await this.insertMany(notExistingPagePaths.map(path => ({ path, isEmpty: true, creator: user })));
   }
   catch (err) {
     logger.error('Failed to insert empty pages.', err);
@@ -478,7 +480,7 @@ schema.statics.createEmptyPagesByPaths = async function(paths: string[], user: a
 };
 
 schema.statics.createEmptyPage = async function(
-    path: string, parent: any, descendantCount = 0, // TODO: improve type including IPage at https://redmine.weseek.co.jp/issues/86506
+    path: string, parent: any, creator: Ref<IUser>, descendantCount = 0, // TODO: improve type including IPage at https://redmine.weseek.co.jp/issues/86506
 ): Promise<PageDocument & { _id: any }> {
   if (parent == null) {
     throw Error('parent must not be null');
@@ -490,6 +492,7 @@ schema.statics.createEmptyPage = async function(
   page.isEmpty = true;
   page.parent = parent;
   page.descendantCount = descendantCount;
+  page.creator = creator;
 
   return page.save();
 };
@@ -500,7 +503,7 @@ schema.statics.createEmptyPage = async function(
  * @param exPage a page document to be replaced
  * @returns Promise<void>
  */
-schema.statics.replaceTargetWithPage = async function(exPage, pageToReplaceWith?, deleteExPageIfEmpty = false) {
+schema.statics.replaceTargetWithPage = async function(exPage, operator: Ref<IUser>, pageToReplaceWith?, deleteExPageIfEmpty = false) {
   // find parent
   const parent = await this.findOne({ _id: exPage.parent });
   if (parent == null) {
@@ -508,7 +511,7 @@ schema.statics.replaceTargetWithPage = async function(exPage, pageToReplaceWith?
   }
 
   // create empty page at path
-  const newTarget = pageToReplaceWith == null ? await this.createEmptyPage(exPage.path, parent, exPage.descendantCount) : pageToReplaceWith;
+  const newTarget = pageToReplaceWith == null ? await this.createEmptyPage(exPage.path, parent, operator, exPage.descendantCount) : pageToReplaceWith;
 
   // find children by ex-page _id
   const children = await this.find({ parent: exPage._id });
@@ -1137,7 +1140,7 @@ export default (crowi: Crowi): any => {
     else {
       if (wasOnTree && isChildrenExist) {
         // Update children's parent with new parent
-        const newParentForChildren = await this.createEmptyPage(pageData.path, pageData.parent, pageData.descendantCount);
+        const newParentForChildren = await this.createEmptyPage(pageData.path, pageData.parent, user, pageData.descendantCount);
         await this.updateMany(
           { parent: pageData._id },
           { parent: newParentForChildren._id },

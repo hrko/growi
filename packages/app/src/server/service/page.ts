@@ -955,7 +955,7 @@ class PageService {
     let duplicatedTarget;
     if (page.isEmpty) {
       const parent = await Page.getParentAndFillAncestors(newPagePath, user);
-      duplicatedTarget = await Page.createEmptyPage(newPagePath, parent);
+      duplicatedTarget = await Page.createEmptyPage(newPagePath, parent, user);
     }
     else {
       await page.populate({ path: 'revision', model: 'Revision', select: 'body' });
@@ -1339,7 +1339,7 @@ class PageService {
     const isChildrenExist = await Page.exists({ parent: page._id });
     const shouldReplace = !isRecursively && isChildrenExist;
     if (shouldReplace) {
-      await Page.replaceTargetWithPage(page, null, true);
+      await Page.replaceTargetWithPage(page, user, null, true);
     }
 
     // Delete target (only updating an existing document's properties )
@@ -1672,7 +1672,7 @@ class PageService {
       const shouldReplace = await Page.exists({ parent: page._id });
       let pageToUpdateDescendantCount = page;
       if (shouldReplace) {
-        pageToUpdateDescendantCount = await Page.replaceTargetWithPage(page);
+        pageToUpdateDescendantCount = await Page.replaceTargetWithPage(page, user);
       }
       await this.updateDescendantCountOfAncestors(pageToUpdateDescendantCount.parent, -1, true);
     }
@@ -2295,7 +2295,7 @@ class PageService {
 
     // replace if empty page exists
     if (existingPage != null && existingPage.isEmpty) {
-      await Page.replaceTargetWithPage(existingPage, page, true);
+      await Page.replaceTargetWithPage(existingPage, user, page, true);
       updatedPage = await Page.findById(page._id);
     }
     else {
