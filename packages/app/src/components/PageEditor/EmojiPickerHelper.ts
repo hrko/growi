@@ -1,3 +1,5 @@
+import { CSSProperties } from 'react';
+
 export default class EmojiPickerHelper {
 
 editor;
@@ -25,6 +27,28 @@ addEmojiOnSearch = (emoji) => {
     this.editor.focus();
     this.editor.refresh();
   }
+}
+
+// Set custom position of emoji picker relative to cursor position in the editor
+getCursorCoords = (emojiPickerHeight):CSSProperties => {
+  const offset = 30;
+  const cursorPos = this.editor.cursorCoords(true);
+  const editorPos = this.editor.getWrapperElement().getBoundingClientRect();
+  this.editor.focus();
+  // Emoji Picker bottom position exceed editor's bottom position
+  if (cursorPos.bottom + emojiPickerHeight > editorPos.bottom) {
+    return {
+      top: editorPos.bottom - emojiPickerHeight,
+      left: cursorPos.left,
+      position: 'fixed',
+    };
+  }
+  return {
+    top: cursorPos.top + offset,
+    left: cursorPos.left,
+    position: 'fixed',
+  };
+
 }
 
 
